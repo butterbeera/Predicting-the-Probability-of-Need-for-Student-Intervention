@@ -1,0 +1,12 @@
+'''
+Some students have multiple "student_successno" values beacause they have more then one major. If someone graduated successfully in one major but failed in another major, we
+still classify him as "successful graduate". But we created a new variable to take into account the impact of the number of Major on target variable in the next step.
+'''
+create table UF_R3_ANALYSIS_MAXSUCCESS2007 AS(
+select *
+from uf_r3_analysis_date2007 A
+WHERE A.STUDENT_SUCCESSNO = (SELECT MAX(B.STUDENT_SUCCESSNO)
+FROM uf_r3_analysis_date2007 B
+WHERE A.PERSON_SID = B.PERSON_SID
+)
+)
