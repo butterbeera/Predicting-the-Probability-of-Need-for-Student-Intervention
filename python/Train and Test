@@ -1,0 +1,126 @@
+Import packages
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+from sklearn import datasets,model_selection,linear_model,metrics,decomposition
+
+df = pd.read_csv("UF_R3_ANALYSIS_LASTMAJOR2007.csv")
+
+df.isnull().sum()
+df.dropna(axis=0, how='any',inplace=True)
+df['STUDENT_SUCCESSNO'].value_counts()
+
+
+One Hot Encoding
+df_JUNIOR_SENIOR_FLAGNO=df['JUNIOR_SENIOR_FLAGNO'].apply(str).str.get_dummies().add_prefix('JUNIOR_SENIOR_FLAGNO: ')
+df_ENRL_CNT = df['ENRL_CNT'].apply(str).str.get_dummies().add_prefix('ENRL_CNT: ')
+df_MAJORCOUNT=df['MAJORCOUNT'].apply(str).str.get_dummies().add_prefix('MAJORCOUNT: ')
+df_UF_CLASSNO=df['UF_CLASSNO'].apply(str).str.get_dummies().add_prefix('UF_CLASSNO: ')
+df_RESIDENCYNO=df['RESIDENCYNO'].apply(str).str.get_dummies().add_prefix('RESIDENCYNO: ')
+df_TERM_END_DT_SID_CATGRYNO=df['TERM_END_DT_SID_CATGRYNO'].apply(str).str.get_dummies().add_prefix('TERM_END_DT_SID_CATGRYNO: ')
+df_TERM_BEG_DT_CATGRYNO=df['TERM_BEG_DT_CATGRYNO'].apply(str).str.get_dummies().add_prefix('TERM_BEG_DT_CATGRYNO: ')
+df_LOW_TERM_GPA_IND=df['LOW_TERM_GPA_IND'].apply(str).str.get_dummies().add_prefix('LOW_TERM_GPA_IND: ')
+df_PARTTIME_TERM_IND=df['PARTTIME_TERM_IND'].apply(str).str.get_dummies().add_prefix('PARTTIME_TERM_IND: ')
+df_NOT_REG_TERM_IND=df['NOT_REG_TERM_IND'].apply(str).str.get_dummies().add_prefix('NOT_REG_TERM_IND: ')
+df_WITHDRWL_TERM_IND=df['WITHDRWL_TERM_IND'].apply(str).str.get_dummies().add_prefix('WITHDRWL_TERM_IND: ')
+df_FULLTIME_TERM_IND=df['FULLTIME_TERM_IND'].apply(str).str.get_dummies().add_prefix('FULLTIME_TERM_IND: ')
+df_OVR_12HR_TERM_IND=df['OVR_12HR_TERM_IND'].apply(str).str.get_dummies().add_prefix('OVR_12HR_TERM_IND: ')
+df=pd.concat([df,df_JUNIOR_SENIOR_FLAGNO,df_ENRL_CNT,df_MAJORCOUNT,df_UF_CLASSNO,df_RESIDENCYNO,df_TERM_END_DT_SID_CATGRYNO,df_TERM_BEG_DT_CATGRYNO,df_LOW_TERM_GPA_IND,df_PARTTIME_TERM_IND,df_NOT_REG_TERM_IND,df_WITHDRWL_TERM_IND,df_FULLTIME_TERM_IND,df_OVR_12HR_TERM_IND],axis=1)
+df = df.drop([
+    'JUNIOR_SENIOR_FLAGNO',
+ 'ENRL_CNT',
+ 'MAJORCOUNT',
+ 'UF_CLASSNO',
+ 'RESIDENCYNO',
+ 'TERM_END_DT_SID_CATGRYNO',
+ 'TERM_BEG_DT_CATGRYNO',
+ 'LOW_TERM_GPA_IND',
+ 'PARTTIME_TERM_IND',
+ 'NOT_REG_TERM_IND',
+ 'WITHDRWL_TERM_IND',
+ 'FULLTIME_TERM_IND',
+ 'OVR_12HR_TERM_IND'
+],axis=1)
+
+
+Create test dataset and train dataset
+df2 = pd .read_csv("UF_R3_ANALYSIS_LASTMAJOR0714BE.csv")
+df2.to_csv("train.csv", index=False)
+df3 = df1[(df1['TERM_BEG_DT_SID'] >=20150101) & (df1['TERM_BEG_DT_SID'] <= 20191231)]
+df3.to_csv("test.csv", index=False)
+
+
+train = pd.read_csv("train.csv")
+test = pd.read_csv("test.csv")
+
+
+mid = train['STUDENT_SUCCESSNO']
+train.drop(labels=['STUDENT_SUCCESSNO'], axis=1,inplace = True)
+train.insert(0, 'STUDENT_SUCCESSNO', mid)
+
+train_x = train.values[0:, 1:]  
+train_y = train.values[0:, 0]
+result_x = test.values[0:, 0:]
+
+
+Split the train dataset
+from sklearn.model_selection import train_test_split
+x_train, x_test, y_train, y_test = train_test_split(train_x, train_y,test_size=0.1,random_state=33)
+
+Fit the model
+from numpy import ravel
+from sklearn.neighbors import KNeighborsClassifier as kNN
+model = kNN(n_neighbors = 3, algorithm='auto', weights='distance')
+model.fit(x_train,ravel(y_train))
+
+
+ 
+Model result
+y_predict = model.predict(x_test)
+print("score on the testdata:",model.score(x_test,y_test))
+print(classification_report(y_test,y_predict))
+
+
+ 
+
+List probability of predicting successfully, predicting results, and actual results. Create a csv file 
+probablity = model.predict_proba(x_test)
+list_pro = []
+for i in range(probablity.shape[0]):
+    pro = max(list(probablity[i]))
+    list_pro.append(pro)
+index = np.array(id).reshape((-1,1))[:,0:1]
+result = pd.DataFrame(np.column_stack((np.array(y_test).reshape(-1,1),np.array(y_predict).reshape(-1,1),np.array(list_pro).reshape(-1,1))),
+columns=['test_label','predict_lable','probablity'])
+result.to_csv('knn_result.csv',index=False,header=True,encoding='gbk')
+ 
+
+Find all the incorrect results and create a csv file 
+
+    diff_index = []
+    for i in range(result.shape[0]):
+        diff_index.append(result['test_label'][i] != result['predict_lable'][i])
+    print(diff_index)
+    diff = result[diff_index]
+    diff_x = x_test[diff_index]
+diff.to_csv('knn_result_diff.csv',index=False,header=True,encoding='gbk')
+ 
+
+
+Predict results of testing dataset and create a csv file
+
+mid = test['STUDENT_SUCCESSNO']
+test.drop(labels=['STUDENT_SUCCESSNO'], axis=1,inplace = True)
+test.insert(0, 'STUDENT_SUCCESSNO', mid)
+
+x_test = test.values[0:, 1:]  
+y_test = test.values[0:, 0]
+
+
+y_predict = model.predict(x_test)
+index = np.array(id).reshape((-1,1))[:,0:1]
+result = pd.DataFrame(np.column_stack(np.array(y_predict).reshape(-1,1),)),
+columns=['predict_lable'])
+result.to_csv('predict_result.csv',index=False,header=True,encoding='gbk')
+ 
