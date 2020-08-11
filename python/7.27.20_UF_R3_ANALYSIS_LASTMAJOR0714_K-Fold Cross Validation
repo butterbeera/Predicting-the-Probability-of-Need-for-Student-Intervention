@@ -1,0 +1,23 @@
+#Author @bridge1998 
+
+Cross Validation for Random Forest
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
+from sklearn.model_selection import cross_val_score
+
+Y = df['STUDENT_SUCCESSNO']
+X = df.drop(['STUDENT_SUCCESSNO'], axis= 1)
+RF = RandomForestClassifier()
+scores = cross_val_score(RF, X, Y, cv=5)
+scores
+
+Cross Validation for KNN
+from sklearn.metrics import accuracy_score, recall_score, f1_score
+from sklearn.neighbors import KNeighborsClassifier as kNN
+
+model = kNN(n_neighbors = 3, algorithm='auto', weights='distance')
+Y = df['STUDENT_SUCCESSNO']
+X = df.drop(['STUDENT_SUCCESSNO'], axis= 1)
+scores = cross_val_score(model, X, Y, cv=5)
+scores
+ 
