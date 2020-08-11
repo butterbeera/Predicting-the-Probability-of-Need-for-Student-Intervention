@@ -1,0 +1,36 @@
+#Lime
+
+xtrainnp = np.array(x_train)
+ytrainnp = np.array(y_train)
+
+explainer = lime.lime_tabular.LimeTabularExplainer(xtrainnp,
+                    feature_names=dfcolumn, 
+                    class_names=['1','2'], 
+                    verbose=True, mode='regression')
+choosen_instance = x_test.iloc[[700]].values[0]
+exp = explainer.explain_instance(choosen_instance, model.predict,num_features=7)
+exp.show_in_notebook(show_all=False)
+exp.as_pyplot_figure()
+
+df2=pd.read_csv("D:/UFL/ISOM/summer2020/QMB6930/codeForProject/UF_R3_ANALYSIS_LASTMAJOR0714BE.csv")
+df2.dropna(axis=0, how='any',inplace=True)
+df2 = df2.loc[df2['STUDENT_SUCCESSNO'].isin(['1','2'])]
+print(x_test.iloc[[700]])
+
+pd.set_option('display.max_columns', None)
+print(df2.iloc[[46109]])
+
+choosen_instance = x_test.iloc[[25]].values[0]
+exp = explainer.explain_instance(choosen_instance, model.predict,num_features=22)
+exp.show_in_notebook(show_all=False)
+exp.as_pyplot_figure()
+
+#Visualization
+
+fig = plt.figure(figsize=(20,10))
+plt.bar(df['STUDENT_SUCCESSNO'].value_counts().index, df['STUDENT_SUCCESSNO'].value_counts().values)
+plt.xticks(df['STUDENT_SUCCESSNO'].value_counts().index,fontsize=15)
+plt.show()
+
+plt.scatter(X.values[:, 0], X.values[:, 1], c=Y)
+plt.show()
