@@ -1,0 +1,49 @@
+#Author @Bridge1998
+
+PCA 
+from pandas.plotting import scatter_matrix
+import sklearn as sk
+
+
+#Data Visualization
+print(X.shape)
+print(Y.shape)
+print(np.unique(Y))
+plt.scatter(X[:, 0], X[:, 1], c=Y)
+plt.show()
+ 
+_ = scatter_matrix(pd.DataFrame(X), alpha=0.5, figsize=(12, 10), c=Y)
+ 
+
+
+pca = sk.decomposition.PCA(n_components=4)#components = dimensions
+# PCA dimensionality reduction
+Xnew = pca.fit_transform(X)
+# Print new feature matrix Xnew shape
+print("Xnew shape: ", Xnew.shape)
+# Print pca explained_variance_ratio_
+print("explained_variance_ratio: ", pca.explained_variance_ratio_)
+plt.plot(pca.explained_variance_ratio_, '-o')
+ 
+
+pca = sk.decomposition.PCA(n_components=2)
+# PCA dimensionality reduction
+Xnew = pca.fit_transform(X)
+# Print new feature matrix Xnew shape
+print("Xnew shape: ", Xnew.shape)
+# Print pca explained_variance_ratio_
+print("explained_variance_ratio: ", pca.explained_variance_ratio_)
+print( pca.explained_variance_ratio_.sum())#How much information we save.
+ 
+from sklearn.model_selection import train_test_split
+Y = df['STUDENT_SUCCESSNO']
+X = df.drop(['STUDENT_SUCCESSNO', 'TERM_END_DT_SID','TERM_SID','UNT_TAKEN_GPA'], axis= 1)
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=1234)
+ 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
+RF = RandomForestClassifier()
+RF = RF.fit(x_train, y_train)
+print(sk.metrics.confusion_matrix(y_true=Y, y_pred=RF.predict(X)))
+print(sk.metrics.f1_score(Y, RF.predict(X), average='macro'))
+ 
