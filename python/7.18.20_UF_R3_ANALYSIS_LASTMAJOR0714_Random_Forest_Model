@@ -1,0 +1,33 @@
+#Author @Dylan(butterbeera)
+
+#Random Forest Model
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import metrics
+RF = RandomForestClassifier()
+RF = RF.fit(x_train, y_train)
+y_pred = RF.predict(x_test)
+print (metrics.classification_report(y_test, y_pred))
+Y_score = RF.predict_proba(x_test)[:,1]
+
+from sklearn.metrics import confusion_matrix
+confusion_matrix(y_test, y_pred)
+
+#Lime
+dfcolumn = df.columns.values.tolist()
+dfcolumn.remove('STUDENT_SUCCESSNO')
+dfcolumn.remove('TERM_END_DT_SID')
+dfcolumn.remove('TERM_SID')
+dfcolumn.remove('UNT_TAKEN_GPA')
+
+import lime
+import lime.lime_tabular
+xtrainnp = np.array(x_train)
+ytrainnp = np.array(y_train)
+
+explainer = lime.lime_tabular.LimeTabularExplainer(xtrainnp,
+                    feature_names=dfcolumn, 
+                    class_names=['1','2','3'], 
+                    verbose=True, mode='regression')
+choosen_instance = x_test.iloc[[200]].values[0]
+exp = explainer.explain_instance(choosen_instance, RF.predict, num_features=24)
+exp.show_in_notebook(show_all=False)
