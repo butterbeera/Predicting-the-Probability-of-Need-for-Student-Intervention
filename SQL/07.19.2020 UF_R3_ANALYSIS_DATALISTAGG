@@ -1,4 +1,4 @@
-#Create this table to combine all the information of each in one row.
+#Create this table to combine all the information of each student in one row.
 
 CREATE TABLE UF_R3_ANALYSIS_DATALISTAGG AS(
 SELECT
