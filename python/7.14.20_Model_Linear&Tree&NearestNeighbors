@@ -1,0 +1,56 @@
+#Author @Bridge1998 
+
+df.isnull().sum()
+df.dtypes
+data_types = df.dtypes 
+cat_cols = list(data_types[data_types=='object'].index)
+con_cols = list(data_types[data_types=='int64'].index) + list(data_types[data_types=='float64'].index)
+con_cols.remove('STUDENT_SUCCESSNO')
+ 
+df=df.drop(['TOT_TEST_CREDIT'], axis=1)
+ 
+corrmat = df[con_cols].corr()
+# Set up the matplotlib figure
+f, ax = plt.subplots(figsize=(15,15))
+# Draw the heatmap using seaborn
+sns.heatmap(corrmat, vmax=.8, annot=True, square=True)
+plt.show()
+ 
+df.loc[df['STUDENT_SUCCESSNO'] !=1]=0
+ 
+df['STUDENT_SUCCESSNO'].value_counts()
+ 
+from sklearn.model_selection import train_test_split
+Y = df['STUDENT_SUCCESSNO']
+X = df.drop(['STUDENT_SUCCESSNO'], axis= 1)
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=1234)
+ 
+fig = plt.figure(figsize=(20,10))
+plt.bar(df['STUDENT_SUCCESSNO'].value_counts().index, df['STUDENT_SUCCESSNO'].value_counts().values)
+plt.xticks(df['STUDENT_SUCCESSNO'].value_counts().index,fontsize=15)
+plt.show()
+
+from sklearn import linear_model
+from sklearn.metrics import accuracy_score, recall_score, f1_score
+lm_lr = linear_model.LogisticRegression()
+lm_lr.fit(x_train,y_train)
+y_pred=lm_lr.predict(x_test)
+print('Logistic Regression')
+print('acc:', accuracy_score(y_test, y_pred))
+print('rec:', recall_score(y_test, y_pred))
+print('F1:', f1_score(y_test, y_pred))
+
+from sklearn import tree
+t_dtc=tree.DecisionTreeClassifier(random_state=1,max_depth=2)
+t_dtc.fit(x_train,y_train)
+Ynew=t_dtc.predict(x_test)
+metrics.classification .confusion_matrix(y_test,Ynew)
+
+from sklearn.neighbors import KNeighborsClassifier as kNN
+model = kNN(n_neighbors = 3, algorithm='auto', weights='distance')
+model.fit(x_train,y_train)
+y_pred = model.predict(x_test)
+print('KNN')
+print('acc:', accuracy_score(y_test, y_pred))
+print('rec:', recall_score(y_test, y_pred))
+print('F1:', f1_score(y_test, y_pred))
